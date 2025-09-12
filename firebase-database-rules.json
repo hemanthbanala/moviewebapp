@@ -1,0 +1,8 @@
+{
+  "rules": {
+    "bookings": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}

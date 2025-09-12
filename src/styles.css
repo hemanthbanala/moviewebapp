@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ✅ apply background + text globally */
+html, body {
+  @apply min-h-screen transition-colors duration-300 bg-white text-black dark:bg-gray-900 dark:text-white;
+}
