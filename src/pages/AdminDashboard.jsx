@@ -3,32 +3,78 @@ import { getBookings } from '../services/bookingService';
 
 const AdminDashboard = () => {
   const [bookings, setBookings] = useState([]);
+  const [filteredBookings, setFilteredBookings] = useState([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [totalBookings, setTotalBookings] = useState(0);
 
-  useEffect(() => {
-    getBookings()
-      .then((data) => {
-        console.log('Fetched bookings in Admin Dashboard:', data);
+  // --- New states for search, filter & pagination ---
+  const [search, setSearch] = useState('');
+  const [selectedMovie, setSelectedMovie] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const bookingsPerPage = 15;
 
-        // Sort bookings by date (latest first)
-        const sortedBookings = data.sort(
-          (a, b) => new Date(b.date) - new Date(a.date)
-        );
+  // convert booking date+time into IST
+  const toIST = (date, time) => {
+    const utcDate = new Date(`${date}T${time}:00Z`); // assume UTC
+    return new Date(utcDate.getTime() + 5.5 * 60 * 60 * 1000); // shift to IST
+  };
 
-        setBookings(sortedBookings);
-        setTotalRevenue(
-          sortedBookings.reduce(
-            (acc, booking) => acc + (booking.ticketAmount || 0),
-            0
-          )
-        );
-        setTotalBookings(sortedBookings.length);
-      })
-      .catch((error) => {
-        console.error('Error fetching bookings in Admin Dashboard:', error);
+ useEffect(() => {
+  getBookings()
+    .then((data) => {
+      // Sort by booking creation time (latest first)
+      const sortedBookings = data.sort((a, b) => {
+        const timeA = new Date(a.createdAt || `${a.date}T${a.time}`);
+        const timeB = new Date(b.createdAt || `${b.date}T${b.time}`);
+        return timeB - timeA;
       });
-  }, []);
+
+      setBookings(sortedBookings);
+      setFilteredBookings(sortedBookings);
+
+      setTotalRevenue(
+        sortedBookings.reduce(
+          (acc, booking) => acc + (booking.ticketAmount || 0),
+          0
+        )
+      );
+      setTotalBookings(sortedBookings.length);
+    })
+    .catch((error) => {
+      console.error('Error fetching bookings in Admin Dashboard:', error);
+    });
+}, []);
+
+
+  // Handles search & dropdown filter
+  useEffect(() => {
+    let result = bookings;
+
+    if (search) {
+      result = result.filter(
+        (b) =>
+          b.user?.toLowerCase().includes(search.toLowerCase()) ||
+          b.movieTitle?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    if (selectedMovie) {
+      result = result.filter((b) => b.movieTitle === selectedMovie);
+    }
+
+    setFilteredBookings(result);
+    setCurrentPage(1);
+  }, [search, selectedMovie, bookings]);
+
+  // Pagination Logic
+  const indexOfLastBooking = currentPage * bookingsPerPage;
+  const indexOfFirstBooking = indexOfLastBooking - bookingsPerPage;
+  const currentBookings = filteredBookings.slice(
+    indexOfFirstBooking,
+    indexOfLastBooking
+  );
+
+  const totalPages = Math.ceil(filteredBookings.length / bookingsPerPage);
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-900 dark:text-white min-h-screen rounded-xl shadow-md">
@@ -54,6 +100,30 @@ const AdminDashboard = () => {
             Seats available: TBD
           </p>
         </div>
+      </div>
+
+      {/* Search & Filter */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="Search by email or movie title..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="p-2 border rounded-md dark:bg-gray-800 dark:border-gray-600 w-full sm:w-1/2"
+        />
+
+        <select
+          value={selectedMovie}
+          onChange={(e) => setSelectedMovie(e.target.value)}
+          className="p-2 border rounded-md dark:bg-gray-800 dark:border-gray-600 w-full sm:w-1/3"
+        >
+          <option value="">All Movies</option>
+          {[...new Set(bookings.map((b) => b.movieTitle))].map((title, i) => (
+            <option key={i} value={title}>
+              {title}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Bookings Table */}
@@ -82,33 +152,69 @@ const AdminDashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {bookings.map((b, index) => (
-              <tr
-                key={index}
-                className="hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-              >
-                <td className="py-2 px-4 border dark:border-gray-600">
-                  {b.user || '-'}
-                </td>
-                <td className="py-2 px-4 border dark:border-gray-600 font-semibold text-blue-700 dark:text-blue-400">
-                  {b.movieTitle}
-                </td>
-                <td className="py-2 px-4 border dark:border-gray-600 text-center">
-                  {b.seats}
-                </td>
-                <td className="py-2 px-4 border dark:border-gray-600 text-center">
-                  {b.date}
-                </td>
-                <td className="py-2 px-4 border dark:border-gray-600 text-center">
-                  {b.time}
-                </td>
-                <td className="py-2 px-4 border dark:border-gray-600 text-center">
-                  ${b.ticketAmount || 0}
-                </td>
-              </tr>
-            ))}
+            {currentBookings.map((b, index) => {
+              const bookingDate = new Date(`${b.date}T${b.time}:00Z`);
+              return (
+                <tr
+                  key={index}
+                  className="hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                >
+                  <td className="py-2 px-4 border dark:border-gray-600">
+                    {b.user || '-'}
+                  </td>
+                  <td className="py-2 px-4 border dark:border-gray-600 font-semibold text-blue-700 dark:text-blue-400">
+                    {b.movieTitle}
+                  </td>
+                  <td className="py-2 px-4 border dark:border-gray-600 text-center">
+                    {b.seats}
+                  </td>
+                  {/*IST formatted date */}
+                  <td className="py-2 px-4 border dark:border-gray-600 text-center">
+                    {bookingDate.toLocaleDateString('en-IN', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                      timeZone: 'Asia/Kolkata',
+                    })}
+                  </td>
+                  {/* IST formatted time */}
+                  <td className="py-2 px-4 border dark:border-gray-600 text-center">
+                    {bookingDate.toLocaleTimeString('en-IN', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true,
+                      timeZone: 'Asia/Kolkata',
+                    })}
+                  </td>
+                  <td className="py-2 px-4 border dark:border-gray-600 text-center">
+                    ${b.ticketAmount || 0}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-between items-center mt-4">
+        <button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage((prev) => prev - 1)}
+          className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages || 1}
+        </span>
+        <button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage((prev) => prev + 1)}
+          className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration (from Firebase Console)
 const firebaseConfig = {
-  apiKey: "process.env.REACT_APP_FIREBASE_API_KEY",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: "moviewebapp-28a1f.firebaseapp.com",
   projectId: "moviewebapp-28a1f",
   storageBucket: "moviewebapp-28a1f.firebasestorage.app",

@@ -20,13 +20,14 @@ const Navbar = () => {
   return (
     <nav className="flex items-center justify-between p-4 bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
       <div className="text-xl font-bold">Movie Explorer</div>
+      <div  className="text-4xl font-bold text-blue-600" > Weclome to Movie Explorer 🎬 </div>
       <div className="flex items-center gap-4">
         <button
           onClick={toggleTheme}
           className="px-3 py-1 rounded border border-gray-400 bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-600 transition"
           title="Toggle theme"
         >
-          {theme === 'dark' ? '🌙 Dark' : '☀️ Light'}
+          {theme === 'dark' ? ' Dark' : ' Light'}
         </button>
         {role === 'admin' && (
           <Link to="/admin" className="bg-yellow-500 px-3 py-1 rounded hover:bg-yellow-600 transition">Admin Dashboard</Link>

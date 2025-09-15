@@ -19,6 +19,9 @@ const AdminRoute = ({ children }) => {
 const App = () => (
   <AuthProvider>
     <Router>
+      {/* Welcome text above navbar */}
+      
+
       {/* Navbar with Tailwind background */}
       <div className="bg-gray-900 text-white shadow-md">
         <Navbar />
@@ -27,17 +30,7 @@ const App = () => (
       {/* Page wrapper */}
       <div className="container mx-auto p-6">
         <Routes>
-          <Route
-            path="/"
-            element={
-              <div className="text-center">
-                <h1 className="text-4xl font-bold text-blue-600 mb-4">
-                  Welcome to Movie Explorer 🎬
-                </h1>
-                <Home />
-              </div>
-            }
-          />
+          <Route path="/" element={<Home />} />
           <Route
             path="/admin"
             element={

@@ -24,10 +24,10 @@ export const bookMovie = async (booking) => {
 
     const docRef = await addDoc(collection(db, BOOKINGS), bookingWithTimestamp);
 
-    console.log('✅ Booking added with ID:', docRef.id);
+    console.log(' Booking added with ID:', docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error('❌ Error adding booking:', error.message);
+    console.error(' Error adding booking:', error.message);
     throw error;
   }
 };
@@ -42,10 +42,10 @@ export const getBookings = async () => {
       ...doc.data(),
     }));
 
-    console.log('📌 Fetched bookings:', bookings);
+    console.log(' Fetched bookings:', bookings);
     return bookings;
   } catch (error) {
-    console.error('❌ Error fetching bookings:', error.message);
+    console.error(' Error fetching bookings:', error.message);
     return [];
   }
 };

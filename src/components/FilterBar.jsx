@@ -50,6 +50,17 @@ const FilterBar = ({ filters, setFilters, genres }) => (
       <option value="hi">Hindi</option>
       <option value="es">Spanish</option>
       <option value="ja">Japanese</option>
+      <option value="fr">French</option>
+      <option value="de">German</option>
+      <option value="zh">Chinese</option>
+      <option value="te">Telugu</option>
+      <option value="ta">Tamil</option>
+      <option value="ml">Malayalam</option>
+      <option value="kn">Kannada</option>
+      <option value="mr">Marathi</option>
+      <option value="bn">Bengali</option>
+      <option value="pa">Punjabi</option>
+      <option value="ko">Korean</option>
       {/* Add more languages as needed */}
     </select>
   </div>
