@@ -11,6 +11,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Add request logging middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log("Headers:", req.headers);
+  next();
+});
 
 app.use("/api/bookings", bookingsRouter);  
 app.use("/api/auth", authRouter);  
@@ -27,6 +33,16 @@ mongoose
 
 app.get("/", (req, res) => {
   res.send(" Movie Booking API is running with JWT Auth");
+});
+
+// Health check route
+app.get("/health", (req, res) => {
+  res.json({ 
+    status: "OK", 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    jwtSecret: process.env.JWT_SECRET ? "JWT_SECRET is set" : "JWT_SECRET is missing"
+  });
 });
 
 const PORT = process.env.PORT || 5000;

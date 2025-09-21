@@ -9,16 +9,21 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { setAuthUser } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const data = await registerUser({ username, email, password });
-      localStorage.setItem("token", data.token);
-      setAuthUser(data.user);
-      setError("");
-      navigate("/"); 
+      
+      if (data.token) {
+        // Use the login function from context to properly set auth state
+        login(data.user || { username, email }, data.token);
+        setError("");
+        navigate("/"); 
+      } else {
+        setError("Registration failed. No token received.");
+      }
     } catch (err) {
       setError(err.message || "Registration failed");
     }

@@ -16,8 +16,10 @@ const BookingModal = ({ open, onClose, onBook, movie }) => {
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
-    if (authUser?.username) {
-      setUserEmail(authUser.username); 
+    if (authUser?.email) {
+      setUserEmail(authUser.email); // Use email from authUser if available
+    } else if (authUser?.username) {
+      setUserEmail(authUser.username); // Fallback to username
     }
   }, [authUser]);
 

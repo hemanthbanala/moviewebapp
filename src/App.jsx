@@ -1,28 +1,12 @@
-import React, { useContext, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import AdminDashboard from './pages/AdminDashboard';
 import Login from './pages/Login.jsx';       
 import Register from './components/Register'; 
-import { AuthProvider, AuthContext } from './context/AuthContext';
-
-const AdminRoute = ({ children }) => {
-  const { authUser } = useContext(AuthContext);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!authUser || authUser.role !== 'admin') {
-      navigate('/');
-    }
-  }, [authUser, navigate]);
-
-  if (!authUser || authUser.role !== 'admin') {
-    return null; 
-  }
-
-  return children;
-};
+import { AuthProvider } from './context/AuthContext';
+import AdminRoute from './utils/AdminRoute';
 
 const AppRoutes = () => (
   <>

@@ -3,11 +3,16 @@ import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 const Navbar = () => {
-  const { user, setAuthUser } = useContext(AuthContext);
+  const { authUser, logout, isAuthenticated, isAdmin } = useContext(AuthContext);
+
+  // Debug logging
+  console.log("Navbar - authUser:", authUser);
+  console.log("Navbar - isAuthenticated:", isAuthenticated);
+  console.log("Navbar - isAdmin:", isAdmin);
+  console.log("Navbar - token in localStorage:", localStorage.getItem("token"));
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    setAuthUser(null);
+    logout();
     window.location.href = "/login";
   };
 
@@ -20,7 +25,7 @@ const Navbar = () => {
 
       {/* Right Side Menu */}
       <div className="flex items-center gap-4">
-        {!user ? (
+        {!isAuthenticated ? (
           <>
             <Link
               to="/login"
@@ -37,7 +42,18 @@ const Navbar = () => {
           </>
         ) : (
           <>
-            <span className="text-sm">Welcome, {user.username}</span>
+            <span className="text-sm">Welcome, {authUser?.username || "User"}</span>
+            
+            {/* Admin Dashboard Button - Only visible to admins */}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="px-4 py-2 rounded bg-purple-500 hover:bg-purple-600 transition text-white font-medium"
+              >
+                Admin Dashboard
+              </Link>
+            )}
+            
             <button
               onClick={handleLogout}
               className="px-4 py-2 rounded bg-red-500 hover:bg-red-600 transition"

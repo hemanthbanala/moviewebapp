@@ -4,7 +4,8 @@ const API_URL = "http://localhost:5000/api/bookings";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
-  return { Authorization: `Bearer ${token}` };
+  console.log(" Token from localStorage:", token ? "Token found" : "No token in localStorage");
+  return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
 export const getBookings = async () => {
@@ -21,11 +22,20 @@ export const getBookingStats = async () => {
   return res.data;
 };
 
-export const bookMovie = async (bookingData) => {
+export const bookMovie = async (bookingData, token) => {
   console.log(" Sending bookingData:", bookingData);
+  console.log(" Using token:", token ? "Token present" : "No token provided");
+  
   try {
+    // Use the provided token or get from localStorage
+    const authHeaders = token 
+      ? { Authorization: `Bearer ${token}` }
+      : getAuthHeaders();
+      
+    console.log(" Auth headers:", authHeaders);
+    
     const res = await axios.post(API_URL, bookingData, {
-      headers: getAuthHeaders(),
+      headers: authHeaders,
     });
     console.log(" Booking success:", res.data);
     return res.data;
