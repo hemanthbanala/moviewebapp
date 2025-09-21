@@ -1,32 +1,51 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { bookMovie } from "../services/bookingService";
 import { AuthContext } from "../context/AuthContext";
 
 const BookingModal = ({ open, onClose, onBook, movie }) => {
-  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { isAuthenticated, authUser } = useContext(AuthContext);
+
   const [seats, setSeats] = useState(1);
   const [showLimit, setShowLimit] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+
+  useEffect(() => {
+    if (authUser?.username) {
+      setUserEmail(authUser.username); 
+    }
+  }, [authUser]);
 
   if (!open) return null;
 
   const handleBook = async () => {
-    if (!user) {
-      setSuccess("login");
-      setTimeout(() => setSuccess(false), 2000);
+    if (!isAuthenticated) {
+      alert("Please log in to book tickets.");
+      navigate("/login");
       return;
     }
+
+    if (!userEmail) {
+      alert("Please enter your email address.");
+      return;
+    }
+
     if (Number(seats) > 5) {
       setShowLimit(true);
       setTimeout(() => setShowLimit(false), 2000);
       return;
     }
+
     if (!selectedDate || !selectedTime) {
       alert("Please select both date and time for booking.");
       return;
     }
+
     if (
       isNaN(new Date(selectedDate).getTime()) ||
       !selectedTime.match(/^\d{2}:\d{2}$/)
@@ -34,26 +53,40 @@ const BookingModal = ({ open, onClose, onBook, movie }) => {
       alert("Invalid date or time format. Please select valid values.");
       return;
     }
+
     setLoading(true);
-    await new Promise((res) => setTimeout(res, 900));
-    setLoading(false);
-    setSuccess({ date: selectedDate, time: selectedTime });
-    setTimeout(() => {
-      setSuccess(false);
-      onBook({
+    try {
+      const token = localStorage.getItem("token");
+
+      const bookingData = {
+        movieTitle: movie.title,
+        movieId: movie.id,
         seats: Number(seats),
         date: selectedDate,
         time: selectedTime,
-        name: user.displayName || "Hemanth",
+        name: authUser?.username || "Guest",
+        userEmail,
         ticketAmount: Number(seats) * 20,
-      });
-    }, 2000);
+      };
+
+      const savedBooking = await bookMovie(bookingData, token);
+
+      setSuccess({ date: selectedDate, time: selectedTime });
+      setTimeout(() => {
+        setSuccess(false);
+        onBook(savedBooking);
+      }, 2000);
+    } catch (err) {
+      console.error("Booking failed:", err.response?.data || err.message);
+      alert("Booking failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 transition-all duration-300">
       <div className="bg-white dark:bg-gray-900 dark:text-white p-8 rounded-2xl shadow-2xl w-96 relative animate-fadeIn transition-colors duration-300">
-        {/* Close button */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xl font-bold"
@@ -61,10 +94,24 @@ const BookingModal = ({ open, onClose, onBook, movie }) => {
           &times;
         </button>
 
-        {/* Title */}
         <h2 className="text-2xl font-extrabold mb-6 text-gray-800 dark:text-gray-100 tracking-tight">
           Book: <span className="text-blue-600">{movie.title}</span>
         </h2>
+
+        {/* Email */}
+        <div className="mb-4">
+          <label className="block mb-1 text-gray-700 dark:text-gray-300 font-medium">
+            Email:
+          </label>
+          <input
+            type="email"
+            value={userEmail}
+            onChange={(e) => setUserEmail(e.target.value)}
+            placeholder="Enter your email"
+            className="w-full border border-gray-300 dark:border-gray-600 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+            disabled={isAuthenticated || loading || success}
+          />
+        </div>
 
         {/* Seats */}
         <div className="mb-4">
@@ -110,7 +157,7 @@ const BookingModal = ({ open, onClose, onBook, movie }) => {
           />
         </div>
 
-        {/* Action buttons */}
+        {/* Buttons */}
         <div className="flex justify-end gap-3 mt-6">
           <button
             onClick={onClose}
@@ -154,15 +201,10 @@ const BookingModal = ({ open, onClose, onBook, movie }) => {
           </button>
         </div>
 
-        {/* Validation messages */}
+        {/* Validation Messages */}
         {showLimit && (
           <div className="mt-6 animate-bounce bg-red-500 text-white px-4 py-2 rounded-lg text-center font-semibold shadow">
             Limit exceeded: Max 5 tickets allowed
-          </div>
-        )}
-        {success && success === "login" && (
-          <div className="mt-6 animate-fadeIn bg-red-500 text-white px-4 py-2 rounded-lg text-center font-semibold shadow">
-            Please login to book tickets.
           </div>
         )}
         {success && typeof success === "object" && (

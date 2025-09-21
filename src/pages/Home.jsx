@@ -7,7 +7,7 @@ import TrailerModal from "../components/TrailerModal";
 import { ThemeContext } from "../context/ThemeContext";
 
 const Home = () => {
-  const [allMovies, setAllMovies] = useState([]); // store all movies
+  const [allMovies, setAllMovies] = useState([]); 
   const [genres, setGenres] = useState([]);
   const [filters, setFilters] = useState({
     genre: "",
@@ -27,7 +27,6 @@ const Home = () => {
 
   const moviesPerPage = 20;
 
-   // fetch ALL movies across 500 pages
   const fetchAllMovies = async () => {
     let all = [];
     let totalPages = 250;
@@ -41,7 +40,6 @@ const Home = () => {
       }
     }
 
-    // remove duplicates (if same movie appears in multiple pages)
     const unique = Array.from(new Map(all.map((m) => [m.id, m])).values());
     setAllMovies(unique);
   };
@@ -53,7 +51,6 @@ const Home = () => {
     tmdb.get("/genre/movie/list").then((res) => setGenres(res.data.genres));
   }, []);
 
-  // Apply filters and search on ALL movies
   const filtered = allMovies.filter((m) => {
     return (
       (!filters.genre || m.genre_ids.includes(Number(filters.genre))) &&
@@ -63,7 +60,6 @@ const Home = () => {
     );
   });
 
-  // Pagination (slice filtered movies for current page)
   const totalPages = Math.ceil(filtered.length / moviesPerPage);
   const paginated = filtered.slice(
     (currentPage - 1) * moviesPerPage,

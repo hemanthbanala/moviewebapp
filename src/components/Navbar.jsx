@@ -1,44 +1,50 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { AuthContext } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import React, { useContext } from "react";
+import { Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 const Navbar = () => {
-  const { user, role, login, logout } = useContext(AuthContext);
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+  const { user, setAuthUser } = useContext(AuthContext);
 
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setAuthUser(null);
+    window.location.href = "/login";
+  };
 
   return (
-    <nav className="flex items-center justify-between p-4 bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900">
-      <div className="text-xl font-bold">Movie Explorer</div>
-      <div  className="text-4xl font-bold text-blue-600" > Weclome to Movie Explorer 🎬 </div>
+    <nav className="flex justify-between items-center px-6 py-4 bg-gray-900 text-white shadow-md">
+      {/* Logo / Home */}
+      <Link to="/" className="text-xl font-bold hover:text-blue-400">
+        Movie Explorer
+      </Link>
+
+      {/* Right Side Menu */}
       <div className="flex items-center gap-4">
-        <button
-          onClick={toggleTheme}
-          className="px-3 py-1 rounded border border-gray-400 bg-white text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-600 transition"
-          title="Toggle theme"
-        >
-          {theme === 'dark' ? ' Dark' : ' Light'}
-        </button>
-        {role === 'admin' && (
-          <Link to="/admin" className="bg-yellow-500 px-3 py-1 rounded hover:bg-yellow-600 transition">Admin Dashboard</Link>
-        )}
-        {user ? (
+        {!user ? (
           <>
-            <span className="mr-2">{user.displayName}</span>
-            <button onClick={logout} className="bg-red-500 px-3 py-1 rounded">Logout</button>
+            <Link
+              to="/login"
+              className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 transition"
+            >
+              Login
+            </Link>
+            <Link
+              to="/register"
+              className="px-4 py-2 rounded bg-green-500 hover:bg-green-600 transition"
+            >
+              Sign Up
+            </Link>
           </>
         ) : (
-          <button onClick={login} className="bg-blue-500 px-3 py-1 rounded">Login with Google</button>
+          <>
+            <span className="text-sm">Welcome, {user.username}</span>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 rounded bg-red-500 hover:bg-red-600 transition"
+            >
+              Logout
+            </button>
+          </>
         )}
       </div>
     </nav>

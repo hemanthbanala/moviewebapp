@@ -1,46 +1,87 @@
-import React, { createContext, useEffect, useState } from 'react';
-import { auth, provider } from '../auth/firebase';
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import React, { createContext, useEffect, useState } from "react";
+import { getToken } from "../services/authService";
+import { jwtDecode } from "jwt-decode";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [role, setRole] = useState(null);
+  const [authUser, setAuthUser] = useState(null);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      if (u) {
-        // Assign roles based on email
-        // Add your admin emails below
-        const adminEmails = [
-          "banalahemanth372@gmail.com"
-          // Add more admin emails here
-        ];
-        const viewerEmails = [
-          "viewer@example.com",
-          // Add more viewer emails here
-        ];
-        if (adminEmails.includes(u.email)) {
-          setRole("admin");
-        } else if (viewerEmails.includes(u.email)) {
-          setRole("viewer");
-        } else {
-          setRole("user");
+    const token = getToken();
+    const user = localStorage.getItem("user");
+
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+
+        const currentTime = Date.now() / 1000;
+        if (decoded.exp && decoded.exp < currentTime) {
+          console.warn("Token expired");
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setAuthUser(null);
+          return;
         }
-      } else {
-        setRole(null);
+
+        // ✅ Restore from localStorage or decoded token
+        setAuthUser(
+          user
+            ? JSON.parse(user)
+            : {
+                id: decoded.id || decoded.uid || null,
+                username:
+                  decoded.username || decoded.name || decoded.email || "User",
+                email: decoded.email || null,
+                role: decoded.role || "user",
+              }
+        );
+      } catch (err) {
+        console.error("Invalid token", err);
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        setAuthUser(null);
       }
-    });
-    return () => unsub();
+    }
   }, []);
 
-  const login = () => signInWithPopup(auth, provider);
-  const logout = () => signOut(auth);
+  const login = (userData, token) => {
+    localStorage.setItem("token", token);
+    if (userData) {
+      localStorage.setItem("user", JSON.stringify(userData));
+    }
+
+    try {
+      const decoded = jwtDecode(token);
+      setAuthUser({
+        id: decoded.id || decoded.uid || null,
+        username:
+          decoded.username ||
+          decoded.name ||
+          decoded.email ||
+          userData?.username,
+        email: decoded.email || userData?.email || null,
+        role: decoded.role || userData?.role || "user",
+      });
+    } catch (err) {
+      console.error("Failed to decode token on login", err);
+      setAuthUser({
+        username: userData?.username || userData?.email,
+        role: userData?.role || "user",
+      });
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setAuthUser(null);
+  };
+
+  const isAuthenticated = Boolean(authUser);
 
   return (
-    <AuthContext.Provider value={{ user, role, login, logout }}>
+    <AuthContext.Provider value={{ authUser, login, logout, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );

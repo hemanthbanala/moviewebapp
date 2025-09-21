@@ -1,51 +1,46 @@
 import React, { useState, useContext } from "react";
-import { loginUser } from "../services/authService";
+import { registerUser } from "../services/authService";
 import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
-const Login = () => {
+const Register = () => {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const { setAuthUser } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const data = await loginUser({ username, password });
-
-      if (data.token) {
-       
-        localStorage.setItem("token", data.token);
-        if (data.user) {
-          localStorage.setItem("user", JSON.stringify(data.user));
-        }
-
-        
-        login(data.user || { username }, data.token);
-
-        setError("");
-        navigate("/");
-      } else {
-        setError("Login failed. No token received.");
-      }
+      const data = await registerUser({ username, email, password });
+      localStorage.setItem("token", data.token);
+      setAuthUser(data.user);
+      setError("");
+      navigate("/"); 
     } catch (err) {
-      console.error("Login error:", err);
-      setError(err.message || "Login failed");
+      setError(err.message || "Registration failed");
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
-      <h2 className="text-2xl font-bold mb-4">Login</h2>
+      <h2 className="text-2xl font-bold mb-4">Sign Up</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-64">
         <input
           type="text"
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          className="border rounded px-3 py-2"
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="border rounded px-3 py-2"
           required
         />
@@ -60,20 +55,21 @@ const Login = () => {
         {error && <p className="text-red-500 text-sm">{error}</p>}
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
         >
-          Login
+          Register
         </button>
       </form>
 
+      {/* Login redirect */}
       <p className="mt-4 text-sm">
-        Don’t have an account?{" "}
-        <Link to="/register" className="text-blue-500 hover:underline">
-          Sign Up
+        Already have an account?{" "}
+        <Link to="/login" className="text-blue-500 hover:underline">
+          Login
         </Link>
       </p>
     </div>
   );
 };
 
-export default Login;
+export default Register;

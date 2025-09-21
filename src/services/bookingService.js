@@ -1,51 +1,36 @@
-// Firestore CRUD for bookings
-import { db } from '../auth/firebase';
-import {
-  collection,
-  getDocs,
-  addDoc,
-  serverTimestamp,
-} from 'firebase/firestore';
+import axios from "axios";
 
-const BOOKINGS = 'bookings';
+const API_URL = "http://localhost:5000/api/bookings"; 
 
-// Add a new booking
-export const bookMovie = async (booking) => {
-  try {
-    if (!booking || typeof booking !== 'object') {
-      throw new Error('Invalid booking data');
-    }
-
-    // Ensure timestamp is added
-    const bookingWithTimestamp = {
-      ...booking,
-      createdAt: serverTimestamp(),
-    };
-
-    const docRef = await addDoc(collection(db, BOOKINGS), bookingWithTimestamp);
-
-    console.log(' Booking added with ID:', docRef.id);
-    return docRef.id;
-  } catch (error) {
-    console.error(' Error adding booking:', error.message);
-    throw error;
-  }
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
+  return { Authorization: `Bearer ${token}` };
 };
 
-// Fetch all bookings
 export const getBookings = async () => {
+  const res = await axios.get(API_URL, {
+    headers: getAuthHeaders(),
+  });
+  return res.data;
+};
+
+export const getBookingStats = async () => {
+  const res = await axios.get(`${API_URL}/stats`, {
+    headers: getAuthHeaders(),
+  });
+  return res.data;
+};
+
+export const bookMovie = async (bookingData) => {
+  console.log(" Sending bookingData:", bookingData);
   try {
-    const snapshot = await getDocs(collection(db, BOOKINGS));
-
-    const bookings = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    console.log(' Fetched bookings:', bookings);
-    return bookings;
-  } catch (error) {
-    console.error(' Error fetching bookings:', error.message);
-    return [];
+    const res = await axios.post(API_URL, bookingData, {
+      headers: getAuthHeaders(),
+    });
+    console.log(" Booking success:", res.data);
+    return res.data;
+  } catch (err) {
+    console.error(" Booking failed:", err.response?.data || err.message);
+    throw err;
   }
 };
