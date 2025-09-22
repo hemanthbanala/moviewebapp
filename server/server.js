@@ -11,7 +11,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Add request logging middleware
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   console.log("Headers:", req.headers);
@@ -35,7 +34,6 @@ app.get("/", (req, res) => {
   res.send(" Movie Booking API is running with JWT Auth");
 });
 
-// Health check route
 app.get("/health", (req, res) => {
   res.json({ 
     status: "OK", 

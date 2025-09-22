@@ -5,7 +5,7 @@ import { AuthContext } from "../context/AuthContext";
 const Navbar = () => {
   const { authUser, logout, isAuthenticated, isAdmin } = useContext(AuthContext);
 
-  // Debug logging
+  
   console.log("Navbar - authUser:", authUser);
   console.log("Navbar - isAuthenticated:", isAuthenticated);
   console.log("Navbar - isAdmin:", isAdmin);
@@ -44,7 +44,7 @@ const Navbar = () => {
           <>
             <span className="text-sm">Welcome, {authUser?.username || "User"}</span>
             
-            {/* Admin Dashboard Button - Only visible to admins */}
+            {/* Admin Dashboard  */}
             {isAdmin && (
               <Link
                 to="/admin"

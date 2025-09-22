@@ -17,9 +17,9 @@ const BookingModal = ({ open, onClose, onBook, movie }) => {
 
   useEffect(() => {
     if (authUser?.email) {
-      setUserEmail(authUser.email); // Use email from authUser if available
+      setUserEmail(authUser.email); 
     } else if (authUser?.username) {
-      setUserEmail(authUser.username); // Fallback to username
+      setUserEmail(authUser.username); 
     }
   }, [authUser]);
 
@@ -67,7 +67,7 @@ const BookingModal = ({ open, onClose, onBook, movie }) => {
         date: selectedDate,
         time: selectedTime,
         name: authUser?.username || "Guest",
-        userEmail,
+        userEmail: authUser?.email || userEmail || "<Email>",
         ticketAmount: Number(seats) * 20,
       };
 

@@ -10,28 +10,7 @@ router.get("/test", (req, res) => {
   res.json({ message: "Auth route is working" });
 });
 
-// REGISTER
-// router.post("/register", async (req, res) => {
-//   try {
-//     const { username, email, password } = req.body;
 
-//     // check if user exists by username or email
-//     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
-//     if (existingUser) {
-//       return res.status(400).json({ message: "Username or Email already taken" });
-//     }
-
-//     // hash password
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     const newUser = new User({ username, email, password: hashedPassword });
-//     await newUser.save();
-
-//     res.json({ message: "User registered successfully" });
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// });
 router.post("/register", async (req, res) => {
   try {
     console.log(" Incoming register request:", req.body);
@@ -50,7 +29,6 @@ router.post("/register", async (req, res) => {
     await newUser.save();
     console.log(" User saved:", newUser);
 
-    // Generate JWT token for the newly registered user
     const token = jwt.sign(
       { id: newUser._id, username: newUser.username, email: newUser.email },
       process.env.JWT_SECRET,

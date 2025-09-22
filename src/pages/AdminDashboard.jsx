@@ -7,19 +7,16 @@ const AdminDashboard = () => {
   const [bookings, setBookings] = useState([]);
   const [filteredBookings, setFilteredBookings] = useState([]);
 
-  // Stats from backend
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [totalBookings, setTotalBookings] = useState(0);
   const [remainingDetails, setRemainingDetails] = useState([]);
 
-  // --- New states for search, filter & pagination ---
   const [search, setSearch] = useState('');
   const [selectedMovie, setSelectedMovie] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const bookingsPerPage = 15;
 
   useEffect(() => {
-    // Fetch bookings
     getBookings()
       .then((data) => {
         const sortedBookings = data.sort((a, b) => {
@@ -30,7 +27,6 @@ const AdminDashboard = () => {
         setBookings(sortedBookings);
         setFilteredBookings(sortedBookings);
 
-        // Calculate stats directly from bookings data
         const totalRev = sortedBookings.reduce((sum, booking) => sum + (booking.ticketAmount || 0), 0);
         const totalBooks = sortedBookings.length;
         
@@ -41,11 +37,9 @@ const AdminDashboard = () => {
       })
       .catch((err) => console.error("Error fetching bookings:", err));
 
-    // Fetch stats from API as backup
     getBookingStats()
       .then((stats) => {
         console.log("Stats from API:", stats);
-        // Only update if we don't have calculated values
         if (stats.totalRevenue) setTotalRevenue(stats.totalRevenue);
         if (stats.totalBookings) setTotalBookings(stats.totalBookings);
         if (stats.remainingDetails) setRemainingDetails(stats.remainingDetails);
@@ -53,7 +47,6 @@ const AdminDashboard = () => {
       .catch((err) => console.error("Error fetching booking stats:", err));
   }, []);
 
-  // Handles search & dropdown filter
   useEffect(() => {
     let result = bookings;
 
@@ -73,7 +66,6 @@ const AdminDashboard = () => {
     setCurrentPage(1);
   }, [search, selectedMovie, bookings]);
 
-  // Pagination Logic
   const indexOfLastBooking = currentPage * bookingsPerPage;
   const indexOfFirstBooking = indexOfLastBooking - bookingsPerPage;
   const currentBookings = filteredBookings.slice(

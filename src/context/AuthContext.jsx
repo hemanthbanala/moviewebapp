@@ -29,7 +29,6 @@ export const AuthProvider = ({ children }) => {
           return;
         }
 
-        // ✅ Restore from localStorage or decoded token
         const userData = user
           ? JSON.parse(user)
           : {

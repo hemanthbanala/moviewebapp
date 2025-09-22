@@ -17,7 +17,6 @@ const Register = () => {
       const data = await registerUser({ username, email, password });
       
       if (data.token) {
-        // Use the login function from context to properly set auth state
         login(data.user || { username, email }, data.token);
         setError("");
         navigate("/"); 

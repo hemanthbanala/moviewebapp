@@ -27,7 +27,6 @@ export const bookMovie = async (bookingData, token) => {
   console.log(" Using token:", token ? "Token present" : "No token provided");
   
   try {
-    // Use the provided token or get from localStorage
     const authHeaders = token 
       ? { Authorization: `Bearer ${token}` }
       : getAuthHeaders();

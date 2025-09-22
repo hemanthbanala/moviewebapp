@@ -16,7 +16,6 @@ const LANGUAGE_MAP = {
   te: 'Telugu',
   ta: 'Tamil',
   ml: 'Malayalam',
-  // Add more as needed
 };
 
 const MovieCard = ({ movie, genres = [], onBook, onImageClick, onPlayTrailer }) => {
