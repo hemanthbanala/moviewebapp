@@ -54,7 +54,7 @@ router.post("/", async (req, res) => {
       ...req.body,
       userId: userId,
       userEmail: req.body.userEmail || req.body.user,
-      user: req.body.userEmail || req.body.user, // Keep for backward compatibility
+      user: req.body.userEmail || req.body.user, 
     };
     
     console.log(" Final booking data:", bookingData);

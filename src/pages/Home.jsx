@@ -95,7 +95,7 @@ const Home = () => {
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-              setCurrentPage(1); // reset to page 1 when searching
+              setCurrentPage(1); 
             }}
             className="w-64 px-4 py-2 border border-gray-300 rounded-lg 
                        focus:outline-none focus:ring-2 focus:ring-blue-400 
