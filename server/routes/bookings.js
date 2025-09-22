@@ -53,7 +53,8 @@ router.post("/", async (req, res) => {
     const bookingData = {
       ...req.body,
       userId: userId,
-      userEmail: req.body.userEmail,
+      userEmail: req.body.userEmail || req.body.user,
+      user: req.body.userEmail || req.body.user, // Keep for backward compatibility
     };
     
     console.log(" Final booking data:", bookingData);

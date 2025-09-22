@@ -53,7 +53,8 @@ const AdminDashboard = () => {
     if (search) {
       result = result.filter(
         (b) =>
-          b.user?.toLowerCase().includes(search.toLowerCase()) ||
+          (b.userEmail && b.userEmail.toLowerCase().includes(search.toLowerCase())) ||
+          (b.user && b.user.toLowerCase().includes(search.toLowerCase())) ||
           b.movieTitle?.toLowerCase().includes(search.toLowerCase())
       );
     }
@@ -152,7 +153,7 @@ const AdminDashboard = () => {
               const bookingDate = new Date(`${b.date}T${b.time}:00Z`);
               return (
                 <tr key={index} className="hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-                  <td className="py-2 px-4 border dark:border-gray-600">{b.userEmail || '-'}</td>
+                  <td className="py-2 px-4 border dark:border-gray-600">{b.userEmail || b.user || '-'}</td>
                   <td className="py-2 px-4 border dark:border-gray-600 font-semibold text-blue-700 dark:text-blue-400">
                     {b.movieTitle}
                   </td>
