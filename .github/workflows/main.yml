@@ -17,7 +17,7 @@ jobs:
       with:
         node-version: '18'
         
-    - name: Build frontend
+    - name: Build frontend (local check)
       run: |
         npm install
         npm run build
@@ -29,21 +29,38 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          
-          cd /var/www/movieapp || sudo mkdir -p /var/www/movieapp && cd /var/www/movieapp
-          
-          
-          sudo git pull origin main || sudo git clone https://github.com/hemanthbanala/moviewebapp.git . 
-        
+          # Navigate to app folder or create if not exists
+          if [ ! -d "/var/www/movieapp" ]; then
+            sudo mkdir -p /var/www/movieapp
+            sudo chown -R $USER:$USER /var/www/movieapp
+          fi
+          cd /var/www/movieapp
+
+          # Pull latest code or clone if first deploy
+          if [ -d ".git" ]; then
+            git reset --hard
+            git pull origin main
+          else
+            git clone https://github.com/hemanthbanala/moviewebapp.git .
+          fi
+
+          # Install frontend dependencies & build
           npm install
           npm run build
-          
-          
+
+          # Backend setup
           cd server
           npm install
-          
-          pm2 restart movieapp-backend || pm2 start server.js --name movieapp-backend
+
+          # Restart backend with PM2
+          if pm2 list | grep -q "movieapp-backend"; then
+            pm2 restart movieapp-backend
+          else
+            pm2 start server.js --name movieapp-backend
+          fi
           pm2 save
+
+          # Restart nginx
           sudo systemctl restart nginx
-          
-          echo "Deployment completed!"
+
+          echo "✅ Deployment completed!"
